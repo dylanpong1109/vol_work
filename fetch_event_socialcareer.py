@@ -176,28 +176,33 @@ payload = {
     "operationName": "jobs"
 }
 
-skip_tracker = 0
-all_data = []
-while True:
-    payload['variables']['skip'] = skip_tracker
-    # Send the POST request
-    response = requests.post(url, headers=headers, json=payload, verify='Zscalar.cer')
+def fetch_social_career():
+    print('Start fetching social career data')
+    skip_tracker = 0
+    all_data = []
+    while True:
+        payload['variables']['skip'] = skip_tracker
+        # Send the POST request
+        response = requests.post(url, headers=headers, json=payload)
 
-    event_list = response.json()['data']['jobs']['data']
-    if event_list == []:
-        break
+        event_list = response.json()['data']['jobs']['data']
+        if event_list == []:
+            break
 
-    all_data += event_list
-    skip_tracker += 12
-    sleep(0.5)
+        all_data += event_list
+        skip_tracker += 12
+        sleep(0.5)
 
-# Save the response as JSON
-if response.status_code == 200:
-    save_json = {"data": {"jobs": {"data": all_data}}}
-    
-    with open("response.json", "w", encoding="utf-8") as f:
-        json.dump(save_json, f, ensure_ascii=False, indent=4)
-    print("Response saved as response.json")
-else:
-    print(f"Request failed with status code: {response.status_code}")
-    print(f"Response: {response.text}")
+    # Save the response as JSON
+    if response.status_code == 200:
+        save_json = {"data": {"jobs": {"data": all_data}}}
+        
+        with open("response.json", "w", encoding="utf-8") as f:
+            json.dump(save_json, f, ensure_ascii=False, indent=4)
+        print("Response saved as response.json")
+    else:
+        print(f"Request failed with status code: {response.status_code}")
+        print(f"Response: {response.text}")
+
+if __name__=="__main__":
+    fetch_social_career()

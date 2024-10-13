@@ -60,41 +60,46 @@ data = {
     "searchvo_searchresultblockid": ""
 }
 
-response = requests.post(url, headers=headers, data=data, verify='Zscalar.cer')
-# print(response.text)
+def fetch_handson():
+    print('Start fetching handson data')
+    response = requests.post(url, headers=headers, data=data)
+    # print(response.text)
 
-# Parse the JSON string
-events = response.json()
+    # Parse the JSON string
+    events = response.json()
 
-all_data = []
+    all_data = []
 
-for date_event in events['items']:
-    for occurrence in date_event['occurrences']:
-        # Extract the required fields
-        event_url = occurrence.get('opportunityLink')
-        event_title = occurrence.get('opportunityName')
-        event_description = occurrence.get('description')
-        start_date = occurrence.get('startDateTimeISO').split('T')[0]
-        end_date = occurrence.get('endDateTimeISO').split('T')[0]
-        start_time = occurrence.get('startTime')
-        end_time = occurrence.get('endTime')
-        all_data.append(occurrence)
+    for date_event in events['items']:
+        for occurrence in date_event['occurrences']:
+            # Extract the required fields
+            event_url = occurrence.get('opportunityLink')
+            event_title = occurrence.get('opportunityName')
+            event_description = occurrence.get('description')
+            start_date = occurrence.get('startDateTimeISO').split('T')[0]
+            end_date = occurrence.get('endDateTimeISO').split('T')[0]
+            start_time = occurrence.get('startTime')
+            end_time = occurrence.get('endTime')
+            all_data.append(occurrence)
 
-        # print("Event URL:", event_url)
-        # print("Event Title:", event_title)
-        # print("Event Description:", event_description)
-        # print("Start Date:", start_date)
-        # print("End Date:", end_date)
-        # print("Start Time:", start_time)
-        # print("End Time:", end_time)
+            # print("Event URL:", event_url)
+            # print("Event Title:", event_title)
+            # print("Event Description:", event_description)
+            # print("Start Date:", start_date)
+            # print("End Date:", end_date)
+            # print("Start Time:", start_time)
+            # print("End Time:", end_time)
 
-# Save the response as JSON
-if response.status_code == 200:
-    save_json = all_data
-    
-    with open("response_handson.json", "w", encoding="utf-8") as f:
-        json.dump(save_json, f, ensure_ascii=False, indent=4)
-    print("Response saved as response_handson.json")
-else:
-    print(f"Request failed with status code: {response.status_code}")
-    print(f"Response: {response.text}")
+    # Save the response as JSON
+    if response.status_code == 200:
+        save_json = all_data
+        
+        with open("response_handson.json", "w", encoding="utf-8") as f:
+            json.dump(save_json, f, ensure_ascii=False, indent=4)
+        print("Response saved as response_handson.json")
+    else:
+        print(f"Request failed with status code: {response.status_code}")
+        print(f"Response: {response.text}")
+
+if __name__=="__main__":
+    fetch_handson()

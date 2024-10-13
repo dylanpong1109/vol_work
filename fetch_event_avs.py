@@ -21,64 +21,69 @@ headers = {
     "sec-ch-ua-platform": "\"Windows\""
 }
 
-response = requests.get('https://www.volunteering.org.hk/campaign_search', headers=headers, verify='Go Daddy Root Certificate Authority - G2.crt')
+def fetch_avs():
+    print('Start fetching avs data')
+    response = requests.get('https://www.volunteering.org.hk/campaign_search', headers=headers)
 
-print(response.status_code)
-html_content = response.text
+    print(response.status_code)
+    html_content = response.text
 
-soup = BeautifulSoup(html_content, 'html.parser')
-activity_div = soup.find('div', id='activityitems')
-events = activity_div.find_all('div', class_='voluntary-item')
-all_data = []
+    soup = BeautifulSoup(html_content, 'html.parser')
+    activity_div = soup.find('div', id='activityitems')
+    events = activity_div.find_all('div', class_='voluntary-item')
+    all_data = []
 
-base_url = "https://www.volunteering.org.hk/"
+    base_url = "https://www.volunteering.org.hk/"
 
-for event in events:
-    title = event.find('div', class_='title').text.strip()
-    start_date = event.find_all('span', class_='date')[0].text.strip()
-    end_date = event.find_all('span', class_='date')[1].text.strip()
-    
-    start_datetime = datetime.strptime(start_date, '%Y-%m-%d %H:%M')
-    end_datetime = datetime.strptime(end_date, '%Y-%m-%d %H:%M')
-    # Calculate duration
-    if '服務時數' in event.text:
-        duration = event.find('div', class_='service-time').text.strip().replace('\t', '')
-    # elif '培訓時間' in event.text:
-    #     duration = event.find('div', class_='service-time').text.strip()
-    else:
-        # Calculate duration if not directly provided
-        duration = end_datetime - start_datetime
+    for event in events:
+        title = event.find('div', class_='title').text.strip()
+        start_date = event.find_all('span', class_='date')[0].text.strip()
+        end_date = event.find_all('span', class_='date')[1].text.strip()
+        
+        start_datetime = datetime.strptime(start_date, '%Y-%m-%d %H:%M')
+        end_datetime = datetime.strptime(end_date, '%Y-%m-%d %H:%M')
+        # Calculate duration
+        if '服務時數' in event.text:
+            duration = event.find('div', class_='service-time').text.strip().replace('\t', '')
+        # elif '培訓時間' in event.text:
+        #     duration = event.find('div', class_='service-time').text.strip()
+        else:
+            # Calculate duration if not directly provided
+            duration = end_datetime - start_datetime
 
-    a_tag = event.find('a', href=True)
-    if a_tag:
-        href = a_tag['href']
-        full_url = base_url + href
-    #     response = requests.get(full_url, headers=headers, verify='Go Daddy Root Certificate Authority - G2.crt')
-    #     # Parse the HTML content using BeautifulSoup
-    #     soup = BeautifulSoup(response.text, 'html.parser')
-    #     # Extract the "職責" content
-    #     description_tag = soup.find('td', string='職責')
-    #     if description_tag:
-    #         description = description_tag.find_next_sibling('td').get_text(strip=True)
-    #     else:
-    #         description = None
+        a_tag = event.find('a', href=True)
+        if a_tag:
+            href = a_tag['href']
+            full_url = base_url + href
+        #     response = requests.get(full_url, headers=headers, verify='Go Daddy Root Certificate Authority - G2.crt')
+        #     # Parse the HTML content using BeautifulSoup
+        #     soup = BeautifulSoup(response.text, 'html.parser')
+        #     # Extract the "職責" content
+        #     description_tag = soup.find('td', string='職責')
+        #     if description_tag:
+        #         description = description_tag.find_next_sibling('td').get_text(strip=True)
+        #     else:
+        #         description = None
 
-    #     # # Extract the "集合地點" content
-    #     # meeting_location = soup.find('td', text='集合地點').find_next_sibling('td').get_text(strip=True)
-    description = None
+        #     # # Extract the "集合地點" content
+        #     # meeting_location = soup.find('td', text='集合地點').find_next_sibling('td').get_text(strip=True)
+        description = None
 
-    event_dict = {"Title": title,
-                "Start Date": str(start_datetime.date()),
-                "End Date": str(end_datetime.date()),
-                "Start Time": str(start_datetime.time()),
-                "End Time": str(end_datetime.time()),
-                "Duration": str(duration), 
-                "Description": description,
-                "URL": full_url}
+        event_dict = {"Title": title,
+                    "Start Date": str(start_datetime.date()),
+                    "End Date": str(end_datetime.date()),
+                    "Start Time": str(start_datetime.time()),
+                    "End Time": str(end_datetime.time()),
+                    "Duration": str(duration), 
+                    "Description": description,
+                    "URL": full_url}
 
-    all_data.append(event_dict)
-    sleep(0.5)
+        all_data.append(event_dict)
+        sleep(0.5)
 
-with open("response_avs.json", "w", encoding="utf-8") as f:
-    json.dump(all_data, f, ensure_ascii=False, indent=4)
-print("Response saved as response.json")
+    with open("response_avs.json", "w", encoding="utf-8") as f:
+        json.dump(all_data, f, ensure_ascii=False, indent=4)
+    print("Response saved as response.json")
+
+if __name__=='__main__':
+    fetch_avs()
