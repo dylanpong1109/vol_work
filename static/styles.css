@@ -1,0 +1,30 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    width: 60%;
+    margin: auto;
+    padding: 20px;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+.event {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.striked {
+    text-decoration: line-through;
+}
+.close-btn {
+    cursor: pointer;
+    color: red;
+    font-size: 32px;
+    float: right;
+    margin-left: 10px;
+}

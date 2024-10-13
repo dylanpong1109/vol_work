@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <a href="/"><h1>Event Dashboard</h1></a>
+
+        <form id="searchForm">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" name="startDate" required>
+            <button type="submit">Search</button> 
+        </form>
+
+        <div id="results">
+            <!-- Results will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("searchForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const startDate = document.getElementById("startDate").value;
+            
+            fetch(`/search?startDate=${startDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById("results");
+                    resultsDiv.innerHTML = '';
+
+                    if (data.length === 0) {
+                        resultsDiv.innerHTML = '<p>No events found.</p>';
+                    }
+                    
+                    data.forEach(event => {
+                        const eventDiv = document.createElement("div");
+                        eventDiv.classList.add("event");
+
+                        eventDiv.innerHTML = `
+                            <span class="close-btn">&times;</span>
+                            <h4>${event.web_host}</h4>
+                            <h2><a href=${event.url} target="_blank" rel="noopener noreferrer">${event.job_title}</a></h2>
+                            <p>${event.job_description}</p>
+                            <h3>${event.session_title}</h3>
+                            <p>Start Date: ${event.startDate}</p>
+                            <p>End Date: ${event.endDate}</p>
+                            <p>Start Time: ${event.startTime}</p>
+                            <p>End Time: ${event.endTime}</p>
+                        `;
+
+                        resultsDiv.appendChild(eventDiv);
+                        const closeButton = eventDiv.querySelector('.close-btn');
+                        closeButton.addEventListener('click', () => {
+                            eventDiv.remove();  // Deletes the event element
+                            // eventDiv.classList.toggle('striked');
+                        });
+                    });
+                })
+                .catch(error => console.error("Error fetching data:", error));
+        });
+    </script>
+</body>
+</html>
