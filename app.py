@@ -14,20 +14,24 @@ def load_events_data():
 
     with open("response_handson.json", 'r', encoding='utf-8') as f:
         events_data_handson = json.load(f)
+
+    with open("response_time_auction.json", 'r', encoding='utf-8') as f:
+        events_data_time_auction = json.load(f)
     
-    return events_data, events_data_avs, events_data_handson
+    return events_data, events_data_avs, events_data_handson, events_data_time_auction
 
 @app.route("/")
 def index():
-    events_data, events_data_avs, events_data_handson = load_events_data()
+    events_data, events_data_avs, events_data_handson, events_data_time_auction = load_events_data()
     return render_template("index.html", events_data=events_data, 
                            events_data_avs=events_data_avs, 
-                           events_data_handson=events_data_handson)
+                           events_data_handson=events_data_handson,
+                           events_data_time_auction=events_data_time_auction)
 
 
 @app.route("/search", methods=["GET"])
 def search():
-    events_data, events_data_avs, events_data_handson = load_events_data()
+    events_data, events_data_avs, events_data_handson, events_data_time_auction = load_events_data()
     def standardize_time(timestamp):
         if timestamp:
             ## Use try-except to parse timstamp, avoid complicated regex expression
@@ -102,7 +106,23 @@ def search():
                     "startTime": standardize_time(event.get("startTime")),
                     "endTime": standardize_time(event.get("endTime"))
                 })
-    
+
+    for event in events_data_time_auction:
+        if event['start_date']:
+            timeslot_start_date = datetime.strptime(event['start_date'].strip(), "%d %b %Y")
+            if timeslot_start_date.date() == start_date.date():
+                results.append({
+                    "url": event["link"],
+                    "web_host": "Time Auction",
+                    "job_title": event["title"] + ": " + event.get("time_details"),
+                    "job_description": event["project_details"],
+                    "session_title": 'N/A',
+                    "startDate": event.get("start_date"),
+                    "endDate": event.get("end_date"),
+                    "startTime": '/',
+                    "endTime": '/'
+                })
+                
     results = sorted(results, key=lambda event: event['startTime'])
 
     return jsonify(results)
